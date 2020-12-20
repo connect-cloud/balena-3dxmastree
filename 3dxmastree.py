@@ -34,20 +34,28 @@ class GracefulKiller:
     self.kill_now = True
     quit()
 
-
+    
 if __name__ == '__main__':
     tree = LEDBoard(*range(2,28),pwm=True)
     killer = GracefulKiller()
     while not killer.kill_now:
         now = datetime.now().strftime("%H%M")
         if now >= STARTTIME and now < STOPTIME:
-            for led in tree:
-                led.source_delay = DELAY
-                led.source = random_values()
-            signal.pause()
-        else:
-            tree.off()
+            if not tree.is_active: # only switch on the tree if it was off
+                for led in tree:
+                    led.source_delay = DELAY
+                    led.source = random_values()
             sleep(60)
+        else:
+            if tree.is_active:
+                tree.close()
+                tree = LEDBoard(*range(2,28),pwm=True)
+                tree.off()
+            sleep(60)
+            
+
+
+
 
 
 
